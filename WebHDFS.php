@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/Curl.php';
+
 class WebHDFS {
 
 	public function __construct($host, $port, $user) {
@@ -9,27 +11,33 @@ class WebHDFS {
 	}
 
 	public function open($path) {
-		return $this->_getWithRedirect('OPEN', $path);
+		$url = $this->_buildUrl($path, array('op'=>'OPEN'));
+		return Curl::getWithRedirect($url);
 	}
 
 	public function getFileStatus($path) {
-		return $this->_get('GETFILESTATUS', $path);
+		$url = $this->_buildUrl($path, array('op'=>'GETFILESTATUS'));
+		return Curl::get($url);
 	}
 
 	public function listStatus($path) {
-		return $this->_get('LISTSTATUS', $path);
+		$url = $this->_buildUrl($path, array('op'=>'LISTSTATUS'));
+		return Curl::get($url);
 	}
 
 	public function getContentSummary($path) {
-		return $this->_get('GETCONTENTSUMMARY', $path);
+		$url = $this->_buildUrl($path, array('op'=>'GETCONTENTSUMMARY'));
+		return Curl::get($url);
 	}
 
 	public function getFileChecksum($path) {
-		return $this->_getWithRedirect('GETFILECHECKSUM', $path);
+		$url = $this->_buildUrl($path, array('op'=>'GETFILECHECKSUM'));
+		return Curl::getWithRedirect($url);
 	}
 
 	public function getHomeDirectory() {
-		return $this->_get('GETHOMEDIRECTORY');
+		$url = $this->_buildUrl('', array('op'=>'GETHOMEDIRECTORY'));
+		return Curl::get($url);
 	}
 
 	public function create($path, $filename) {
@@ -37,73 +45,25 @@ class WebHDFS {
 			return false;
 		}
 
-		$url = $this->_putLocation('CREATE', $path);
-		return $this->_putToUrl($url, $filename);
+		$url = $this->_buildUrl($path, array('op'=>'CREATE'));
+		$redirectUrl = Curl::putLocation($url);
+		return Curl::putFile($redirectUrl, $filename);
 	}
 
-	private function _getWithRedirect($operation, $path) {
-		return $this->_get($operation, $path, array(CURLOPT_FOLLOWLOCATION => true));
+	public function mkdirs($path) {
+		$url = $this->_buildUrl($path, array('op'=>'MKDIRS'));
+		return Curl::put($url);
 	}
 
-	private function _get($operation, $path='', $options=array()) {
-		$options[CURLOPT_URL] = $this->_buildUrl($path, array('op'=>$operation));
-		$options[CURLOPT_RETURNTRANSFER] = true;
-		return $this->_exec($options);
-	}
-
-	private function _putLocation($operation, $path) {
-		$options[CURLOPT_URL] = $this->_buildUrl($path, array('op'=>$operation));
-		$options[CURLOPT_PUT] = true;
-
-		$info = $this->_exec($options, true);
-
-		return $info['redirect_url'];
-	}
-
-	private function _putToUrl($url, $filename) {
-		$options[CURLOPT_URL] = $url;
-		$options[CURLOPT_PUT] = true;
-		$handle = fopen($filename, "r");
-		$options[CURLOPT_INFILE] = $handle;
-		$options[CURLOPT_INFILESIZE] = filesize($filename);
-
-		$info = $this->_exec($options, true);
-
-		return ('201' == $info['http_code']);
-	}
-
-	// 	private function _putWithRedirect($operation, $path, $filename) {
-	// 		return $this->_put($operation, $path, $filename, array(CURLOPT_FOLLOWLOCATION => true));
-	// 	}
-
-	// 	private function _put($operation, $path, $filename, $options=array()) {
-	// 		// 		$options[CURLOPT_VERBOSE] = true;
-	// 		$options[CURLOPT_URL] = $this->_buildUrl($path, array('op'=>$operation));
-	// 		$options[CURLOPT_PUT] = true;
-	// 		$options[CURLOPT_HEADER] = true;
-	// 		$options[CURLOPT_RETURNTRANSFER] = true;
-	// 		$handle = fopen($filename, "r");
-	// 		$options[CURLOPT_INFILE] = $handle;
-	// 		$options[CURLOPT_INFILESIZE] = filesize($filename);
-
-	// 		return $this->_exec($options);
-	// 	}
-
-	private function _buildUrl($path, $query_data) {
-		$query_data['user.name'] = $this->user;
-		return 'http://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query($query_data);
-	}
-
-	private function _exec($options, $returnInfo=false) {
-		$ch = curl_init();
-		curl_setopt_array($ch, $options);
-		$result = curl_exec($ch);
-		if ($returnInfo) {
-			$result = curl_getinfo($ch);
+	public function append($path, $filename) {
+		if (!file_exists($filename)) {
+			return false;
 		}
-		curl_close($ch);
 
-		return $result;
+		$url = $this->_buildUrl($path, array('op'=>'APPEND'));
+		$redirectUrl = Curl::postLocation($url);
+
+		return Curl::postFile($redirectUrl, $filename);
 	}
 
 }
