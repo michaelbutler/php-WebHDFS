@@ -41,6 +41,11 @@ class WebHDFS {
 		return Curl::put($url);
 	}
 
+	public function rename($path, $newPath) {
+		$url = $this->_buildUrl($path, array('op'=>'RENAME', 'destination'=>$newPath));
+		return Curl::put($url);
+	}
+
 	public function getFileStatus($path) {
 		$url = $this->_buildUrl($path, array('op'=>'GETFILESTATUS'));
 		return Curl::get($url);

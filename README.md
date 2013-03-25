@@ -65,7 +65,10 @@ $hdfs->mkdirs('user/hadoop-username/new/directory/structure');
 Not yet implemented.
 
 #### Rename a File/Directory
-Not yet implemented.
+```php
+$hdfs = new WebHDFS('mynamenode.hadoop.com', '50070', 'hadoop-username');
+$hdfs->rename('user/hadoop-username/file.txt', '/user/hadoop-username/renamed-file.txt');
+````
 
 #### Delete a File/Directory
 Not yet implemented.
