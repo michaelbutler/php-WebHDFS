@@ -38,10 +38,10 @@ class Curl {
 		return ('201' == $info['http_code']);
 	}
 
-	public static function postFile($url, $filename) {
+	public static function postString($url, $string) {
 		$options[CURLOPT_URL] = $url;
 		$options[CURLOPT_POST] = true;
-		$options[CURLOPT_POSTFIELDS] = file_get_contents($filename);
+		$options[CURLOPT_POSTFIELDS] = $string;
 
 		$info = self::_exec($options, true);
 

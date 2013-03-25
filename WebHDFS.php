@@ -20,15 +20,10 @@ class WebHDFS {
 		return Curl::putFile($redirectUrl, $filename);
 	}
 
-	public function append($path, $filename) {
-		if (!file_exists($filename)) {
-			return false;
-		}
-
+	public function append($path, $string) {
 		$url = $this->_buildUrl($path, array('op'=>'APPEND'));
 		$redirectUrl = Curl::postLocation($url);
-
-		return Curl::postFile($redirectUrl, $filename);
+		return Curl::postString($redirectUrl, $string);
 	}
 
 	public function open($path) {
