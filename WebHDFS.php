@@ -10,9 +10,35 @@ class WebHDFS {
 		$this->user = $user;
 	}
 
+	public function create($path, $filename) {
+		if (!file_exists($filename)) {
+			return false;
+		}
+
+		$url = $this->_buildUrl($path, array('op'=>'CREATE'));
+		$redirectUrl = Curl::putLocation($url);
+		return Curl::putFile($redirectUrl, $filename);
+	}
+
+	public function append($path, $filename) {
+		if (!file_exists($filename)) {
+			return false;
+		}
+
+		$url = $this->_buildUrl($path, array('op'=>'APPEND'));
+		$redirectUrl = Curl::postLocation($url);
+
+		return Curl::postFile($redirectUrl, $filename);
+	}
+
 	public function open($path) {
 		$url = $this->_buildUrl($path, array('op'=>'OPEN'));
 		return Curl::getWithRedirect($url);
+	}
+
+	public function mkdirs($path) {
+		$url = $this->_buildUrl($path, array('op'=>'MKDIRS'));
+		return Curl::put($url);
 	}
 
 	public function getFileStatus($path) {
@@ -38,32 +64,6 @@ class WebHDFS {
 	public function getHomeDirectory() {
 		$url = $this->_buildUrl('', array('op'=>'GETHOMEDIRECTORY'));
 		return Curl::get($url);
-	}
-
-	public function create($path, $filename) {
-		if (!file_exists($filename)) {
-			return false;
-		}
-
-		$url = $this->_buildUrl($path, array('op'=>'CREATE'));
-		$redirectUrl = Curl::putLocation($url);
-		return Curl::putFile($redirectUrl, $filename);
-	}
-
-	public function mkdirs($path) {
-		$url = $this->_buildUrl($path, array('op'=>'MKDIRS'));
-		return Curl::put($url);
-	}
-
-	public function append($path, $filename) {
-		if (!file_exists($filename)) {
-			return false;
-		}
-
-		$url = $this->_buildUrl($path, array('op'=>'APPEND'));
-		$redirectUrl = Curl::postLocation($url);
-
-		return Curl::postFile($redirectUrl, $filename);
 	}
 
 }
