@@ -66,4 +66,9 @@ class WebHDFS {
 		return Curl::get($url);
 	}
 
+	private function _buildUrl($path, $query_data) {
+		$query_data['user.name'] = $this->user;
+		return 'http://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query($query_data);
+	}
+
 }
