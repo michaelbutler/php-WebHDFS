@@ -46,6 +46,11 @@ class WebHDFS {
 		return Curl::put($url);
 	}
 
+	public function delete($path) {
+		$url = $this->_buildUrl($path, array('op'=>'DELETE'));
+		return Curl::delete($url);
+	}
+
 	public function getFileStatus($path) {
 		$url = $this->_buildUrl($path, array('op'=>'GETFILESTATUS'));
 		return Curl::get($url);

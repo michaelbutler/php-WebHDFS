@@ -57,6 +57,15 @@ class Curl {
 		return self::_exec($options);
 	}
 
+	public static function delete($url) {
+		$options = array();
+		$options[CURLOPT_URL] = $url;
+		$options[CURLOPT_CUSTOMREQUEST] = "DELETE";
+		$options[CURLOPT_RETURNTRANSFER] = true;
+
+		return self::_exec($options);
+	}
+
 	private static function _exec($options, $returnInfo=false) {
 		$ch = curl_init();
 		curl_setopt_array($ch, $options);
