@@ -118,4 +118,7 @@ Not yet implemented.
 Not yet implemented.
 
 #### Set Access or Modification Time
-Not yet implemented.
+```php
+$hdfs = new WebHDFS('mynamenode.hadoop.com', '50070', 'hadoop-username');
+$response = $hdfs->setTimes('user/hadoop-username/file.txt');
+```
