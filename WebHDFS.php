@@ -95,6 +95,11 @@ class WebHDFS {
 		return Curl::put($url);
 	}
 
+	public function setReplication($path, $replication) {
+		$url = $this->_buildUrl($path, array('op'=>'SETREPLICATION', 'replication'=>$replication));
+		return Curl::put($url);
+	}
+
 	public function setTimes($path) {
 		$url = $this->_buildUrl($path, array('op'=>'SETTIMES'));
 		return Curl::put($url);

@@ -127,7 +127,10 @@ $hdfs->setOwner('user/hadoop-username/file.txt', 'other-user');
 ````
 
 #### Set Replication Factor
-Not yet implemented.
+```php
+$hdfs = new WebHDFS('mynamenode.hadoop.com', '50070', 'hadoop-username');
+$hdfs->setReplication('user/hadoop-username/file.txt', '2');
+````
 
 #### Set Access or Modification Time
 ```php
