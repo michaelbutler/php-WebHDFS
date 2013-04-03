@@ -47,7 +47,10 @@ $hdfs->append('user/hadoop-username/file-to-append-to.txt', 'local-file.txt');
 ```
 
 #### Concat File(s)
-Not yet implemented.
+```php
+$hdfs = new WebHDFS('mynamenode.hadoop.com', '50070', 'hadoop-username');
+$hdfs->concat('user/hadoop-username/concatenated-file.txt', '/test/file1,/test/file2,/test/file3');
+```
 
 #### Open and Read a File
 ```php

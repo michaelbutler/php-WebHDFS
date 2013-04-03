@@ -57,6 +57,15 @@ class Curl {
 		return self::_exec($options);
 	}
 
+	public static function post($url) {
+		$options = array();
+		$options[CURLOPT_URL] = $url;
+		$options[CURLOPT_POST] = true;
+		$options[CURLOPT_RETURNTRANSFER] = true;
+
+		return self::_exec($options);
+	}
+
 	public static function delete($url) {
 		$options = array();
 		$options[CURLOPT_URL] = $url;

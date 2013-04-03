@@ -10,6 +10,8 @@ class WebHDFS {
 		$this->user = $user;
 	}
 
+	// File and Directory Operations
+
 	public function create($path, $filename) {
 		if (!file_exists($filename)) {
 			return false;
@@ -24,6 +26,11 @@ class WebHDFS {
 		$url = $this->_buildUrl($path, array('op'=>'APPEND'));
 		$redirectUrl = Curl::postLocation($url);
 		return Curl::postString($redirectUrl, $string);
+	}
+
+	public function concat($path, $sources) {
+		$url = $this->_buildUrl($path, array('op'=>'CONCAT', 'sources'=>$sources));
+		return Curl::post($url);
 	}
 
 	public function open($path) {
@@ -55,6 +62,8 @@ class WebHDFS {
 		$url = $this->_buildUrl($path, array('op'=>'LISTSTATUS'));
 		return Curl::get($url);
 	}
+
+	// Other File System Operations
 
 	public function getContentSummary($path) {
 		$url = $this->_buildUrl($path, array('op'=>'GETCONTENTSUMMARY'));
