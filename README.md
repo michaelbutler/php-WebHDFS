@@ -65,7 +65,10 @@ $hdfs->mkdirs('user/hadoop-username/new/directory/structure');
 ```
 
 #### Create a Symbolic Link
-Not yet implemented.
+```php
+$hdfs = new WebHDFS('mynamenode.hadoop.com', '50070', 'hadoop-username');
+$hdfs->createSymLink('user/hadoop-username/file.txt', '/user/hadoop-username/symlink-to-file.txt');
+````
 
 #### Rename a File/Directory
 ```php

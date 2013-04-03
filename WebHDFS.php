@@ -43,8 +43,13 @@ class WebHDFS {
 		return Curl::put($url);
 	}
 
-	public function rename($path, $newPath) {
-		$url = $this->_buildUrl($path, array('op'=>'RENAME', 'destination'=>$newPath));
+	public function createSymLink($path, $destination) {
+		$url = $this->_buildUrl($destination, array('op'=>'CREATESYMLINK', 'destination'=>$path));
+		return Curl::put($url);
+	}
+
+	public function rename($path, $destination) {
+		$url = $this->_buildUrl($path, array('op'=>'RENAME', 'destination'=>$destination));
 		return Curl::put($url);
 	}
 
@@ -86,6 +91,10 @@ class WebHDFS {
 	}
 
 	private function _buildUrl($path, $query_data) {
+		if ($path[0] == '/') {
+			$path = substr($path, 1);
+		}
+
 		$query_data['user.name'] = $this->user;
 		return 'http://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query($query_data);
 	}
