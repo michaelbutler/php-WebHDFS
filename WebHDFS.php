@@ -22,8 +22,8 @@ class WebHDFS {
 		return Curl::putFile($redirectUrl, $filename);
 	}
 
-	public function append($path, $string) {
-		$url = $this->_buildUrl($path, array('op'=>'APPEND'));
+	public function append($path, $string, $bufferSize='') {
+		$url = $this->_buildUrl($path, array('op'=>'APPEND', 'buffersize'=>$bufferSize));
 		$redirectUrl = Curl::postLocation($url);
 		return Curl::postString($redirectUrl, $string);
 	}
@@ -33,18 +33,18 @@ class WebHDFS {
 		return Curl::post($url);
 	}
 
-	public function open($path) {
-		$url = $this->_buildUrl($path, array('op'=>'OPEN'));
+	public function open($path, $offset='', $length='', $bufferSize='') {
+		$url = $this->_buildUrl($path, array('op'=>'OPEN', 'offset'=>$offset, 'length'=>$length, 'buffersize'=>$bufferSize));
 		return Curl::getWithRedirect($url);
 	}
 
-	public function mkdirs($path) {
-		$url = $this->_buildUrl($path, array('op'=>'MKDIRS'));
+	public function mkdirs($path, $permission='') {
+		$url = $this->_buildUrl($path, array('op'=>'MKDIRS', 'permission'=>$permission));
 		return Curl::put($url);
 	}
 
-	public function createSymLink($path, $destination) {
-		$url = $this->_buildUrl($destination, array('op'=>'CREATESYMLINK', 'destination'=>$path));
+	public function createSymLink($path, $destination, $createParent='') {
+		$url = $this->_buildUrl($destination, array('op'=>'CREATESYMLINK', 'destination'=>$path, 'createParent'=>$createParent));
 		return Curl::put($url);
 	}
 
@@ -53,8 +53,8 @@ class WebHDFS {
 		return Curl::put($url);
 	}
 
-	public function delete($path) {
-		$url = $this->_buildUrl($path, array('op'=>'DELETE'));
+	public function delete($path, $recursive='') {
+		$url = $this->_buildUrl($path, array('op'=>'DELETE', 'recursive'=>$recursive));
 		return Curl::delete($url);
 	}
 
@@ -90,8 +90,8 @@ class WebHDFS {
 		return Curl::put($url);
 	}
 
-	public function setOwner($path, $owner) {
-		$url = $this->_buildUrl($path, array('op'=>'SETOWNER', 'owner'=>$owner));
+	public function setOwner($path, $owner='', $group='') {
+		$url = $this->_buildUrl($path, array('op'=>'SETOWNER', 'owner'=>$owner, 'group'=>$group));
 		return Curl::put($url);
 	}
 
@@ -100,8 +100,8 @@ class WebHDFS {
 		return Curl::put($url);
 	}
 
-	public function setTimes($path) {
-		$url = $this->_buildUrl($path, array('op'=>'SETTIMES'));
+	public function setTimes($path, $modificationTime='', $accessTime='') {
+		$url = $this->_buildUrl($path, array('op'=>'SETTIMES', 'modificationtime'=>$modificationTime, 'accesstime'=>$accessTime));
 		return Curl::put($url);
 	}
 
@@ -111,7 +111,7 @@ class WebHDFS {
 		}
 
 		$query_data['user.name'] = $this->user;
-		return 'http://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query($query_data);
+		return 'http://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query(array_filter($query_data));
 	}
 
 }
