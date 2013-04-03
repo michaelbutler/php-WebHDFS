@@ -90,6 +90,11 @@ class WebHDFS {
 		return Curl::put($url);
 	}
 
+	public function setOwner($path, $owner) {
+		$url = $this->_buildUrl($path, array('op'=>'SETOWNER', 'owner'=>$owner));
+		return Curl::put($url);
+	}
+
 	public function setTimes($path) {
 		$url = $this->_buildUrl($path, array('op'=>'SETTIMES'));
 		return Curl::put($url);
