@@ -115,7 +115,10 @@ $response = $hdfs->getHomeDirectory();
 ```
 
 #### Set Permission
-Not yet implemented.
+```php
+$hdfs = new WebHDFS('mynamenode.hadoop.com', '50070', 'hadoop-username');
+$hdfs->setPermission('user/hadoop-username/file.txt', '777');
+````
 
 #### Set Owner
 Not yet implemented.

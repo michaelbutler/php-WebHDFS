@@ -85,6 +85,11 @@ class WebHDFS {
 		return Curl::get($url);
 	}
 
+	public function setPermission($path, $permission) {
+		$url = $this->_buildUrl($path, array('op'=>'SETPERMISSION', 'permission'=>$permission));
+		return Curl::put($url);
+	}
+
 	public function setTimes($path) {
 		$url = $this->_buildUrl($path, array('op'=>'SETTIMES'));
 		return Curl::put($url);
