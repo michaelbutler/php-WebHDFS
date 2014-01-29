@@ -22,8 +22,14 @@ class Curl {
 
 	private static function _findRedirectUrl($url, $options) {
 		$options[CURLOPT_URL] = $url;
-		$info = self::_exec($options, true);
-		return $info['redirect_url'];
+		$options[CURLOPT_HEADER] = true;
+		$options[CURLINFO_EFFECTIVE_URL] = true;
+		$options[CURLOPT_RETURNTRANSFER] = true;
+		$header = self::_exec($options);
+		$matches = array();
+		preg_match('/Location:(.*?)\n/', $header, $matches);
+		$redirectUrl = trim($matches[1]);
+		return $redirectUrl;
 	}
 
 	public static function putFile($url, $filename) {
