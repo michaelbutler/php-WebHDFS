@@ -53,6 +53,7 @@ class Curl {
 		$options[CURLOPT_URL] = $url;
 		$options[CURLOPT_PUT] = true;
 		$options[CURLOPT_RETURNTRANSFER] = true;
+		$options[CURLOPT_INFILESIZE] = 0;
 
 		return self::_exec($options);
 	}
