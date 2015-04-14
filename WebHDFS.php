@@ -106,7 +106,7 @@ class WebHDFS {
 	}
 
 	private function _buildUrl($path, $query_data) {
-		if ($path[0] == '/') {
+		if (strlen($path) && $path[0] == '/') {
 			$path = substr($path, 1);
 		}
 
