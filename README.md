@@ -9,6 +9,11 @@ php-WebHDFS is a PHP client for [WebHDFS](http://hadoop.apache.org/docs/r2.0.3-a
 * [PHP](http://php.net/)
 * [cURL](http://curl.haxx.se/)
 
+## Install via composer
+
+```bash
+composer require simpleenergy/php-WebHDFS
+```
 
 ## Usage
 

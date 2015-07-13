@@ -1,13 +1,31 @@
 <?php
 
-require_once __DIR__ . '/Curl.php';
+namespace org\apache\hadoop;
+
+use org\apache\hadoop\tools\Curl;
 
 class WebHDFS {
+	private $host;
+	private $port;
+	private $user;
+	private $namenode_rpc_host;
+	private $namenode_rpc_port;
+	private $debug;
 
-	public function __construct($host, $port, $user) {
+	public function __construct(
+		$host,
+		$port,
+		$user,
+		$namenodeRpcHost,
+		$namenodeRpcPort,
+		$debug
+	) {
 		$this->host = $host;
 		$this->port = $port;
 		$this->user = $user;
+		$this->namenode_rpc_host = $namenodeRpcHost;
+		$this->namenode_rpc_port = $namenodeRpcPort;
+		$this->debug = $debug;
 	}
 
 	// File and Directory Operations
@@ -110,7 +128,13 @@ class WebHDFS {
 			$path = substr($path, 1);
 		}
 
-		$query_data['user.name'] = $this->user;
+		if(!isset($query_data['user.name'])) {
+			$query_data['user.name'] = $this->user;
+		}
+		// it is required to specify the namenode rpc address in, at least, write requests
+		if(!isset($query_data['namenoderpcaddress'])) {
+			$query_data['namenoderpcaddress'] = $this->namenode_rpc_host.':'.$this->namenode_rpc_port;
+		}
 		return 'http://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query(array_filter($query_data));
 	}
 
