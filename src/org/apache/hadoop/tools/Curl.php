@@ -1,5 +1,7 @@
 <?php
 
+namespace org\apache\hadoop\tools;
+
 class Curl {
 
 	public static function getWithRedirect($url) {
@@ -84,6 +86,8 @@ class Curl {
 
 	private static function _exec($options, $returnInfo=false) {
 		$ch = curl_init();
+		$options[CURLOPT_VERBOSE] = true;
+		$options[CURLOPT_HTTPHEADER] = array('Expect: ');
 		curl_setopt_array($ch, $options);
 		$result = curl_exec($ch);
 

@@ -1,0 +1,39 @@
+{
+  "name": "simpleenergy/php-webhdfs",
+  "description": "php-WebHDFS",
+  "minimum-stability": "stable",
+  "license": "unknown",
+  "authors": [
+    {
+      "name": "tranch-xiao",
+      "homepage": "https://github.com/tranch-xiao"
+    },
+    {
+      "name": "dshap",
+      "homepage": "https://github.com/dshap"
+    },
+    {
+      "name": "jacobko",
+      "homepage": "https://github.com/jacobko"
+    },
+    {
+      "name": "yosshi",
+      "homepage": "https://github.com/yosshi"
+    },
+    {
+      "name": "Sebastian Lagemann",
+      "email": "sebastian@iqu.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.0",
+    "ext-curl": "*"
+  },
+  "autoload": {
+    "psr-0": {
+      "org\\apache\\hadoop\\": "src/",
+      "org\\apache\\hadoop\\tools": "app/models/"
+    }
+  }
+
+}
