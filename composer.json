@@ -1,6 +1,6 @@
 {
-  "name": "simpleenergy/php-webhdfs",
-  "description": "php-WebHDFS",
+  "name": "degola/php-webhdfs",
+  "description": "PHP WebHDFS, forked from https://github.com/simpleenergy/php-WebHDFS",
   "minimum-stability": "stable",
   "license": "unknown",
   "authors": [
