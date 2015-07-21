@@ -71,7 +71,11 @@ class WebHDFS {
 
 	public function open($path, $offset='', $length='', $bufferSize='') {
 		$url = $this->_buildUrl($path, array('op'=>'OPEN', 'offset'=>$offset, 'length'=>$length, 'buffersize'=>$bufferSize));
-		return $this->curl->getWithRedirect($url);
+		$result = $this->curl->getWithRedirect($url);
+		if($this->curl->validateLastRequest()) {
+			return $result;
+		}
+		throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
 	}
 
 	public function mkdirs($path, $permission='') {
@@ -211,6 +215,11 @@ class WebHDFS {
 						break;
 					case 'java.io.FileNotFoundException':
 						$exceptionCode = WebHDFS_Exception::FILE_NOT_FOUND;
+						break;
+					case 'org.apache.hadoop.security.AccessControlException':
+						if(preg_match('/Permission denied/i', $data->RemoteException->message)) {
+							$exceptionCode = WebHDFS_Exception::PERMISSION_DENIED;
+						}
 						break;
 				}
 				;

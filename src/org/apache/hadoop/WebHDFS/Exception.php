@@ -16,6 +16,7 @@ namespace org\apache\hadoop;
 class WebHDFS_Exception extends \Exception {
 	const FILE_ALREADY_EXISTS = 1;
 	const FILE_NOT_FOUND = 2;
+	const PERMISSION_DENIED = 3;
 }
 
 ?>
