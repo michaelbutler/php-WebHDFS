@@ -5,6 +5,7 @@ namespace org\apache\hadoop\tools;
 class Curl {
 	private $debug;
 	private $lastRequestContentResult;
+	private $lastRequestInfoResult;
 
 	public function __construct($debug = false) {
 		$this->debug = $debug;
@@ -107,6 +108,16 @@ class Curl {
 	public function getLastRequestContentResult() {
 		return $this->lastRequestContentResult;
 	}
+	public function getLastRequestInfoResult() {
+		return $this->lastRequestInfoResult;
+	}
+	public function validateLastRequest() {
+		$http_code = $this->getLastRequestInfoResult()['http_code'];
+		if($http_code >= 400 && $http_code <= 500) {
+			return false;
+		}
+		return true;
+	}
 	private function _exec($options, $returnInfo=false) {
 		$ch = curl_init();
 		if($this->debug === true) {
@@ -123,8 +134,9 @@ class Curl {
 		curl_setopt_array($ch, $options);
 		$result = curl_exec($ch);
 		$this->lastRequestContentResult = $result;
+		$this->lastRequestInfoResult = curl_getinfo($ch);
 		if ($returnInfo) {
-			$result = curl_getinfo($ch);
+			$result = $this->lastRequestInfoResult;
 		}
 
 		curl_close($ch);
