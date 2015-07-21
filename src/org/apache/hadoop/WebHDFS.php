@@ -101,7 +101,37 @@ class WebHDFS {
 
 	public function listStatus($path) {
 		$url = $this->_buildUrl($path, array('op'=>'LISTSTATUS'));
-		return $this->curl->get($url);
+		if($result = $this->curl->get($url)) {
+			$result = json_decode($result);
+			if(!is_null($result)) {
+				return $result;
+			} else {
+				throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+			}
+		} else {
+			throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+		}
+		return false;
+	}
+	public function listFiles($path, $recursive = false) {
+		$result = array();
+		$listStatusResult = $this->listStatus($path);
+		if(isset($listStatusResult->FileStatuses->FileStatus)) {
+			foreach ($listStatusResult->FileStatuses->FileStatus AS $fileEntity) {
+				switch ($fileEntity->type) {
+					case 'DIRECTORY':
+						if ($recursive === true) {
+							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', true));
+						}
+						break;
+					default:
+						$result[] = $path . $fileEntity->pathSuffix;
+				}
+			}
+		} else {
+			throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+		}
+		return $result;
 	}
 
 	// Other File System Operations
@@ -179,7 +209,9 @@ class WebHDFS {
 					case 'org.apache.hadoop.fs.FileAlreadyExistsException':
 						$exceptionCode = WebHDFS_Exception::FILE_ALREADY_EXISTS;
 						break;
-
+					case 'java.io.FileNotFoundException':
+						$exceptionCode = WebHDFS_Exception::FILE_NOT_FOUND;
+						break;
 				}
 				;
 			}
