@@ -12,7 +12,7 @@ php-WebHDFS is a PHP client for [WebHDFS](http://hadoop.apache.org/docs/r2.0.3-a
 ## Install via composer
 
 ```bash
-composer require degola/php-webhdfs
+composer require simpleenergy/php-webhdfs
 ```
 
 ## Usage
