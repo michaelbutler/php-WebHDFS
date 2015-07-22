@@ -9,11 +9,17 @@ php-WebHDFS is a PHP client for [WebHDFS](http://hadoop.apache.org/docs/r2.0.3-a
 * [PHP](http://php.net/)
 * [cURL](http://curl.haxx.se/)
 
+## Install via composer
+
+```bash
+composer require simpleenergy/php-webhdfs
+```
 
 ## Usage
 
 * [File and Directory Operations](#file-and-directory-operations)
   * [Create and Write to a File](#create-and-write-to-a-file)
+  * [Create and write content directly to a file](#create-and-write-content-directly-to-a-file)
   * [Append to a File](#append-to-a-file)
   * [Concat File(s)](#concat-files)
   * [Open and Read a File](#open-and-read-a-file)
@@ -39,6 +45,13 @@ php-WebHDFS is a PHP client for [WebHDFS](http://hadoop.apache.org/docs/r2.0.3-a
 hdfs = new WebHDFS('mynamenode.hadoop.com', '50070', 'hadoop-username');
 $hdfs->create('user/hadoop-username/new-file.txt', 'local-file.txt');
 ```
+
+#### Create and write content directly to a file
+```php
+hdfs = new WebHDFS('mynamenode.hadoop.com', '50070', 'hadoop-username');
+$hdfs->createWithData('user/hadoop-username/new-file.txt', 'content');
+```
+
 
 #### Append to a File
 ```php
