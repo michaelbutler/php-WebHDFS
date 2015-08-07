@@ -51,7 +51,10 @@ class WebHDFS {
 	public function createWithData($path, $data) {
 		$url = $this->_buildUrl($path, array('op' => 'CREATE'));
 		$redirectUrl = $this->curl->putLocation($url);
-		$result = $this->curl->putData($redirectUrl, $data);
+		$result = false;
+		if($redirectUrl) {
+			$result = $this->curl->putData($redirectUrl, $data);
+		}
 		if($result !== true) {
 			throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
 		}

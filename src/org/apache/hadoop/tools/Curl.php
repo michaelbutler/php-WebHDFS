@@ -36,9 +36,11 @@ class Curl {
 		$options[CURLOPT_RETURNTRANSFER] = true;
 		$header = $this->_exec($options);
 		$matches = array();
-		preg_match('/Location:(.*?)\n/', $header, $matches);
-		$redirectUrl = trim($matches[1]);
-		return $redirectUrl;
+		if(preg_match('/Location:(.*?)\n/', $header, $matches)) {
+			$redirectUrl = trim($matches[1]);
+			return $redirectUrl;
+		}
+		return null;
 	}
 
 	public function putFile($url, $filename) {
