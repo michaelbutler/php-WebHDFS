@@ -117,7 +117,7 @@ class WebHDFS {
 		}
 		return false;
 	}
-	public function listFiles($path, $recursive = false) {
+	public function listFiles($path, $recursive = false, $includeFileMetaData = false) {
 		$result = array();
 		$listStatusResult = $this->listStatus($path);
 		if(isset($listStatusResult->FileStatuses->FileStatus)) {
@@ -125,11 +125,16 @@ class WebHDFS {
 				switch ($fileEntity->type) {
 					case 'DIRECTORY':
 						if ($recursive === true) {
-							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', true));
+							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', true, $includeFileMetaData));
 						}
 						break;
 					default:
-						$result[] = $path . $fileEntity->pathSuffix;
+						if($includeFileMetaData === true) {
+							$fileEntity->path = $path . $fileEntity->pathSuffix;
+							$result[] = $fileEntity;
+						} else {
+							$result[] = $path . $fileEntity->pathSuffix;
+						}
 				}
 			}
 		} else {
