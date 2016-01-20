@@ -160,7 +160,7 @@ class WebHDFS {
 							$result[] = $path . $fileEntity->pathSuffix;
 						}
 						if ($recursive === true) {
-							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', $recursive, $includeFileMetaData));
+							$result = array_merge($result, $this->listDirectories($path . $fileEntity->pathSuffix . '/', $recursive, $includeFileMetaData));
 						}
 						break;
 				}
