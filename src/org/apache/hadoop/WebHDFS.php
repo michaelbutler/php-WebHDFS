@@ -17,12 +17,12 @@ class WebHDFS {
 	private $curl;
 
 	public function __construct(
-		$host,
-		$port,
-		$user,
-		$namenodeRpcHost,
-		$namenodeRpcPort,
-		$debug
+			$host,
+			$port,
+			$user,
+			$namenodeRpcHost,
+			$namenodeRpcPort,
+			$debug
 	) {
 		$this->host = $host;
 		$this->port = $port;
@@ -51,7 +51,10 @@ class WebHDFS {
 	public function createWithData($path, $data) {
 		$url = $this->_buildUrl($path, array('op' => 'CREATE'));
 		$redirectUrl = $this->curl->putLocation($url);
-		$result = $this->curl->putData($redirectUrl, $data);
+		$result = false;
+		if($redirectUrl) {
+			$result = $this->curl->putData($redirectUrl, $data);
+		}
 		if($result !== true) {
 			throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
 		}
@@ -117,7 +120,7 @@ class WebHDFS {
 		}
 		return false;
 	}
-	public function listFiles($path, $recursive = false) {
+	public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxAmountOfFiles = false) {
 		$result = array();
 		$listStatusResult = $this->listStatus($path);
 		if(isset($listStatusResult->FileStatuses->FileStatus)) {
@@ -125,11 +128,20 @@ class WebHDFS {
 				switch ($fileEntity->type) {
 					case 'DIRECTORY':
 						if ($recursive === true) {
-							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', true));
+							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', true, $includeFileMetaData, $maxAmountOfFiles - sizeof($result)));
 						}
 						break;
 					default:
-						$result[] = $path . $fileEntity->pathSuffix;
+						if($includeFileMetaData === true) {
+							$fileEntity->path = $path . $fileEntity->pathSuffix;
+							$result[] = $fileEntity;
+						} else {
+							$result[] = $path . $fileEntity->pathSuffix;
+						}
+				}
+				// recursion will be interrupted since we subtract the amount of the current result set from the maxAmountOfFiles amount with calling the next recursion
+				if(sizeof($result) >= $maxAmountOfFiles) {
+					break;
 				}
 			}
 		} else {
@@ -138,11 +150,43 @@ class WebHDFS {
 		return $result;
 	}
 
+	public function listDirectories($path, $recursive = false, $includeFileMetaData = false) {
+		$result = array();
+		$listStatusResult = $this->listStatus($path);
+		if(isset($listStatusResult->FileStatuses->FileStatus)) {
+			foreach ($listStatusResult->FileStatuses->FileStatus AS $fileEntity) {
+				switch ($fileEntity->type) {
+					case 'DIRECTORY':
+						if($includeFileMetaData === true) {
+							$fileEntity->path = $path. $fileEntity->pathSuffix;
+							$result[] = $fileEntity;
+						} else {
+							$result[] = $path . $fileEntity->pathSuffix;
+						}
+						if ($recursive === true) {
+							$result = array_merge($result, $this->listDirectories($path . $fileEntity->pathSuffix . '/', $recursive, $includeFileMetaData));
+						}
+						break;
+				}
+			}
+		} else {
+			throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+		}
+		return $result;
+	}
 	// Other File System Operations
 
 	public function getContentSummary($path) {
+		$result = false;
 		$url = $this->_buildUrl($path, array('op'=>'GETCONTENTSUMMARY'));
-		return $this->curl->get($url);
+		$rawResult = $this->curl->get($url);
+		$resultDecoded = json_decode($rawResult);
+		if(isset($resultDecoded->ContentSummary)) {
+			$result = $resultDecoded->ContentSummary;
+		} else {
+			throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+		}
+		return $result;
 	}
 
 	public function getFileChecksum($path) {
@@ -203,12 +247,12 @@ class WebHDFS {
 		$exceptionMessage = 'invalid/unknown response/exception: '.$responseData;
 		if(!is_null($data)) {
 			if(
-				isset($data->RemoteException->exception) &&
-				isset($data->RemoteException->javaClassName) &&
-				isset($data->RemoteException->message)
+					isset($data->RemoteException->exception) &&
+					isset($data->RemoteException->javaClassName) &&
+					isset($data->RemoteException->message)
 			) {
 				$exceptionMessage = $data->RemoteException->exception . ' in ' . $data->RemoteException->javaClassName . "\n" .
-					$data->RemoteException->message;
+						$data->RemoteException->message;
 				switch($data->RemoteException->javaClassName) {
 					case 'org.apache.hadoop.fs.FileAlreadyExistsException':
 						$exceptionCode = WebHDFS_Exception::FILE_ALREADY_EXISTS;
