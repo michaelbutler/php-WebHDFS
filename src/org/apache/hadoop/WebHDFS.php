@@ -17,12 +17,12 @@ class WebHDFS {
 	private $curl;
 
 	public function __construct(
-		$host,
-		$port,
-		$user,
-		$namenodeRpcHost,
-		$namenodeRpcPort,
-		$debug
+			$host,
+			$port,
+			$user,
+			$namenodeRpcHost,
+			$namenodeRpcPort,
+			$debug
 	) {
 		$this->host = $host;
 		$this->port = $port;
@@ -120,7 +120,7 @@ class WebHDFS {
 		}
 		return false;
 	}
-	public function listFiles($path, $recursive = false, $includeFileMetaData = false) {
+	public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxAmountOfFiles = false) {
 		$result = array();
 		$listStatusResult = $this->listStatus($path);
 		if(isset($listStatusResult->FileStatuses->FileStatus)) {
@@ -128,7 +128,7 @@ class WebHDFS {
 				switch ($fileEntity->type) {
 					case 'DIRECTORY':
 						if ($recursive === true) {
-							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', true, $includeFileMetaData));
+							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', true, $includeFileMetaData, $maxAmountOfFiles - sizeof($result)));
 						}
 						break;
 					default:
@@ -138,6 +138,10 @@ class WebHDFS {
 						} else {
 							$result[] = $path . $fileEntity->pathSuffix;
 						}
+				}
+				// recursion will be interrupted since we subtract the amount of the current result set from the maxAmountOfFiles amount with calling the next recursion
+				if(sizeof($result) >= $maxAmountOfFiles) {
+					break;
 				}
 			}
 		} else {
@@ -243,12 +247,12 @@ class WebHDFS {
 		$exceptionMessage = 'invalid/unknown response/exception: '.$responseData;
 		if(!is_null($data)) {
 			if(
-				isset($data->RemoteException->exception) &&
-				isset($data->RemoteException->javaClassName) &&
-				isset($data->RemoteException->message)
+					isset($data->RemoteException->exception) &&
+					isset($data->RemoteException->javaClassName) &&
+					isset($data->RemoteException->message)
 			) {
 				$exceptionMessage = $data->RemoteException->exception . ' in ' . $data->RemoteException->javaClassName . "\n" .
-					$data->RemoteException->message;
+						$data->RemoteException->message;
 				switch($data->RemoteException->javaClassName) {
 					case 'org.apache.hadoop.fs.FileAlreadyExistsException':
 						$exceptionCode = WebHDFS_Exception::FILE_ALREADY_EXISTS;
