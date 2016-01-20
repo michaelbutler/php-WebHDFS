@@ -146,11 +146,43 @@ class WebHDFS {
 		return $result;
 	}
 
+	public function listDirectories($path, $recursive = false, $includeFileMetaData = false) {
+		$result = array();
+		$listStatusResult = $this->listStatus($path);
+		if(isset($listStatusResult->FileStatuses->FileStatus)) {
+			foreach ($listStatusResult->FileStatuses->FileStatus AS $fileEntity) {
+				switch ($fileEntity->type) {
+					case 'DIRECTORY':
+						if($includeFileMetaData === true) {
+							$fileEntity->path = $path. $fileEntity->pathSuffix;
+							$result[] = $fileEntity;
+						} else {
+							$result[] = $path . $fileEntity->pathSuffix;
+						}
+						if ($recursive === true) {
+							$result = array_merge($result, $this->listFiles($path . $fileEntity->pathSuffix . '/', $recursive, $includeFileMetaData));
+						}
+						break;
+				}
+			}
+		} else {
+			throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+		}
+		return $result;
+	}
 	// Other File System Operations
 
 	public function getContentSummary($path) {
+		$result = false;
 		$url = $this->_buildUrl($path, array('op'=>'GETCONTENTSUMMARY'));
-		return $this->curl->get($url);
+		$rawResult = $this->curl->get($url);
+		$resultDecoded = json_decode($rawResult);
+		if(isset($resultDecoded->ContentSummary)) {
+			$result = $resultDecoded->ContentSummary;
+		} else {
+			throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+		}
+		return $result;
 	}
 
 	public function getFileChecksum($path) {
