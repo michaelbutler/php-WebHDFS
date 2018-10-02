@@ -11,6 +11,7 @@ class WebHDFS {
 	private $namenode_rpc_host;
 	private $namenode_rpc_port;
 	private $debug;
+	private $use_ssl = false;
 	/**
 	 * @var Curl
 	 */
@@ -219,6 +220,11 @@ class WebHDFS {
 		return $this->curl->put($url);
 	}
 
+	public function useSsl($use_ssl) {
+	    $this->use_ssl = $use_ssl;
+	    return $this;
+    }
+
 	private function _buildUrl($path, $query_data) {
 		if (strlen($path) && $path[0] == '/') {
 			$path = substr($path, 1);
@@ -231,7 +237,8 @@ class WebHDFS {
 		if(!isset($query_data['namenoderpcaddress'])) {
 			$query_data['namenoderpcaddress'] = $this->namenode_rpc_host.':'.$this->namenode_rpc_port;
 		}
-		return 'http://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query(array_filter($query_data));
+		$protocol = 'http'.($this->use_ssl ? 's' : '');
+        return $protocol.'://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query(array_filter($query_data));
 	}
 
 	/**
