@@ -36,12 +36,20 @@ class WebHDFS {
 
 	// File and Directory Operations
 
-	public function create($path, $filename) {
+	public function create($path, $filename, $overwrite=false, $blocksize=null, $replication=null, $permission=null, $buffersize=null) {
 		if (!file_exists($filename)) {
 			return false;
 		}
 
-		$url = $this->_buildUrl($path, array('op'=>'CREATE'));
+		$options = array(
+			'op'=> 'CREATE',
+			'overwrite' => $overwrite,
+			'blocksize' => $blocksize,
+			'replication' => $replication,
+			'permission' => $permission,
+			'buffersize' => $buffersize,
+		);
+		$url = $this->_buildUrl($path, $options);
 		$redirectUrl = $this->curl->putLocation($url);
 		$result = $this->curl->putFile($redirectUrl, $filename);
 		if($result !== true) {
@@ -49,8 +57,16 @@ class WebHDFS {
 		}
 		return $result;
 	}
-	public function createWithData($path, $data) {
-		$url = $this->_buildUrl($path, array('op' => 'CREATE'));
+	public function createWithData($path, $data, $overwrite=false, $blockSize=null, $replication=null, $permission=null, $bufferSize=null) {
+		$options = array(
+			'op'=> 'CREATE',
+			'overwrite' => $overwrite,
+			'blocksize' => $blockSize,
+			'replication' => $replication,
+			'permission' => $permission,
+			'buffersize' => $bufferSize,
+		);
+		$url = $this->_buildUrl($path, $options);
 		$redirectUrl = $this->curl->putLocation($url);
 		$result = false;
 		if($redirectUrl) {
@@ -100,6 +116,11 @@ class WebHDFS {
 	public function delete($path, $recursive='') {
 		$url = $this->_buildUrl($path, array('op'=>'DELETE', 'recursive'=>$recursive));
 		return $this->curl->delete($url);
+	}
+
+	public function truncate($path, $newLength=0) {
+		$url = $this->_buildUrl($path, array('op'=>'TRUNCATE', 'newlength'=>$newLength));
+		return $this->curl->post($url);
 	}
 
 	public function getFileStatus($path) {
@@ -200,6 +221,11 @@ class WebHDFS {
 		return $this->curl->get($url);
 	}
 
+	public function getTrashRoot() {
+		$url = $this->_buildUrl('', array('op'=>'GETTRASHROOT'));
+		return $this->curl->get($url);
+	}
+
 	public function setPermission($path, $permission) {
 		$url = $this->_buildUrl($path, array('op'=>'SETPERMISSION', 'permission'=>$permission));
 		return $this->curl->put($url);
@@ -215,15 +241,50 @@ class WebHDFS {
 		return $this->curl->put($url);
 	}
 
+	public function modifyAclEntries($path, $aclSpec='') {
+		$url = $this->_buildUrl($path, array('op'=>'MODIFYACLENTRIES', 'aclspec'=>$aclSpec));
+		return $this->curl->put($url);
+	}
+
+	public function removeAclEntries($path, $aclSpec='') {
+		$url = $this->_buildUrl($path, array('op'=>'REMOVEACLENTRIES', 'aclspec'=>$aclSpec));
+		return $this->curl->put($url);
+	}
+
+	public function removeDefaultAcl($path) {
+		$url = $this->_buildUrl($path, array('op'=>'REMOVEDEFAULTACL'));
+		return $this->curl->put($url);
+	}
+
+	public function removeAcl($path) {
+		$url = $this->_buildUrl($path, array('op'=>'REMOVEACL'));
+		return $this->curl->put($url);
+	}
+
+	public function setAcl($path, $aclSpec='') {
+		$url = $this->_buildUrl($path, array('op'=>'SETACL', 'aclspec'=>$aclSpec));
+		return $this->curl->put($url);
+	}
+
+	public function getAclStatus($path) {
+		$url = $this->_buildUrl($path, array('op'=>'GETACLSTATUS'));
+		return $this->curl->get($url);
+	}
+
+	public function checkAccess($path, $fsaction='') {
+		$url = $this->_buildUrl($path, array('op'=>'CHECKACCESS', 'fsaction'=>$fsaction));
+		return $this->curl->get($url);
+	}
+
 	public function setTimes($path, $modificationTime='', $accessTime='') {
 		$url = $this->_buildUrl($path, array('op'=>'SETTIMES', 'modificationtime'=>$modificationTime, 'accesstime'=>$accessTime));
 		return $this->curl->put($url);
 	}
 
 	public function useSsl($use_ssl) {
-	    $this->use_ssl = $use_ssl;
-	    return $this;
-    }
+		$this->use_ssl = $use_ssl;
+		return $this;
+	}
 
 	private function _buildUrl($path, $query_data) {
 		if (strlen($path) && $path[0] == '/') {
@@ -238,7 +299,7 @@ class WebHDFS {
 			$query_data['namenoderpcaddress'] = $this->namenode_rpc_host.':'.$this->namenode_rpc_port;
 		}
 		$protocol = 'http'.($this->use_ssl ? 's' : '');
-        return $protocol.'://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query(array_filter($query_data));
+		return $protocol.'://' . $this->host . ':' . $this->port . '/webhdfs/v1/' . $path . '?' . http_build_query(array_filter($query_data));
 	}
 
 	/**
