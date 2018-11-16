@@ -11,8 +11,18 @@ class Curl {
 		$this->debug = $debug;
 	}
 
-	public function getWithRedirect($url) {
-		return $this->get($url, array(CURLOPT_FOLLOWLOCATION => true));
+	public function getWithRedirect($url, $localPath='') {
+	    $option = array(CURLOPT_FOLLOWLOCATION => true);
+	    if ($localPath) {
+            if (touch($localPath)) {
+                $option['CURLOPT_WRITEFUNCTION_PATH'] = $localPath;
+                $this->get($url, $option);
+            } else {
+                return false;
+            }
+        } else {
+            return $this->get($url, $option);
+        }
 	}
 
 	public function get($url, $options=array()) {
@@ -133,6 +143,17 @@ class Curl {
 		} else {
 			$options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], array('Expect: '));
 		}
+		if (isset($options['CURLOPT_WRITEFUNCTION_PATH'])) {
+            $localPath = $options['CURLOPT_WRITEFUNCTION_PATH'];
+            $options[CURLOPT_WRITEFUNCTION] = function ($ch, $string) use ($localPath) {
+                $fp = fopen($localPath,'a');
+                $length = fwrite($fp, $string);
+                fclose($fp);
+                return $length;
+            };
+            unset($options['CURLOPT_WRITEFUNCTION_PATH']);
+        }
+
 		curl_setopt_array($ch, $options);
 		$result = curl_exec($ch);
 		$this->lastRequestContentResult = $result;

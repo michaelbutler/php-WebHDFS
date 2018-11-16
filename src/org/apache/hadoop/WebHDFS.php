@@ -89,9 +89,9 @@ class WebHDFS {
 		return $this->curl->post($url);
 	}
 
-	public function open($path, $offset='', $length='', $bufferSize='') {
+	public function open($path, $offset='', $length='', $bufferSize='', $localPath = '') {
 		$url = $this->_buildUrl($path, array('op'=>'OPEN', 'offset'=>$offset, 'length'=>$length, 'buffersize'=>$bufferSize));
-		$result = $this->curl->getWithRedirect($url);
+		$result = $this->curl->getWithRedirect($url, $localPath);
 		if($this->curl->validateLastRequest()) {
 			return $result;
 		}
