@@ -13,6 +13,17 @@ class Curl
         $this->debug = $debug;
     }
 
+    public function cleanLastRequest()
+    {
+        unset($this->lastRequestInfoResult);
+        unset($this->lastRequestContentResult);
+        if (function_exists('gc_collect_cycles')) {
+            gc_collect_cycles();
+        }
+
+        return $this;
+    }
+
     public function getWithRedirect($url)
     {
         return $this->get($url, array(CURLOPT_FOLLOWLOCATION => true));
@@ -124,21 +135,34 @@ class Curl
         return $this->_exec($options);
     }
 
-    public function getLastRequestContentResult()
+    public function getLastRequestContentResult($cleanLastRequest = false)
     {
-        return $this->lastRequestContentResult;
+        $r = $this->lastRequestContentResult;
+        if ($cleanLastRequest) {
+            $this->cleanLastRequest();
+        }
+
+        return $r;
     }
 
-    public function getLastRequestInfoResult()
+    public function getLastRequestInfoResult($cleanLastRequest = false)
     {
-        return $this->lastRequestInfoResult;
+        $r = $this->lastRequestInfoResult;
+        if ($cleanLastRequest) {
+            $this->cleanLastRequest();
+        }
+
+        return $r;
     }
 
-    public function validateLastRequest()
+    public function validateLastRequest($cleanLastRequestIfValid = false)
     {
         $http_code = $this->getLastRequestInfoResult()['http_code'];
         if ($http_code >= 400 && $http_code <= 500) {
             return false;
+        }
+        if ($cleanLastRequestIfValid) {
+            $this->cleanLastRequest();
         }
 
         return true;
@@ -159,6 +183,8 @@ class Curl
             $options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], array('Expect: '));
         }
         curl_setopt_array($ch, $options);
+        // force clean memory before getting more data
+        $this->cleanLastRequest();
         $result = curl_exec($ch);
         $this->lastRequestContentResult = $result;
         $this->lastRequestInfoResult = curl_getinfo($ch);
@@ -172,5 +198,3 @@ class Curl
     }
 
 }
-
-?>
