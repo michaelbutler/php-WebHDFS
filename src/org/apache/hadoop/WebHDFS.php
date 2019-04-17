@@ -427,5 +427,3 @@ class WebHDFS
         return new WebHDFS_Exception($exceptionMessage, $exceptionCode);
     }
 }
-
-?>

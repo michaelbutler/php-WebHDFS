@@ -19,5 +19,3 @@ class WebHDFS_Exception extends \Exception
     const FILE_NOT_FOUND = 2;
     const PERMISSION_DENIED = 3;
 }
-
-?>
