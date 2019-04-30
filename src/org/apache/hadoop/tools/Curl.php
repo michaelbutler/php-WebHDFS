@@ -2,8 +2,6 @@
 
 namespace org\apache\hadoop\tools;
 
-use org\apache\hadoop\WebHDFS_Exception;
-
 class Curl
 {
     private $debug;
