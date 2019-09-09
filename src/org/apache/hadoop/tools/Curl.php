@@ -17,9 +17,7 @@ class Curl
     {
         unset($this->lastRequestInfoResult);
         unset($this->lastRequestContentResult);
-        if (function_exists('gc_collect_cycles')) {
-            gc_collect_cycles();
-        }
+        gc_collect_cycles();
 
         return $this;
     }
