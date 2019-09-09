@@ -17,11 +17,13 @@ class Curl
     {
         $this->debug = $debug;
     }
+
     /**
      *
      * @param $localPath string local file path to save
      */
-    public function setOption($key,$value) {
+    public function setOption($key, $value)
+    {
         $this->options[$key] = $value;
     }
 
@@ -213,13 +215,9 @@ class Curl
         if (!$has_content_length_header && !isset($options[CURLOPT_INFILE]) && !isset($options[CURLOPT_INFILESIZE])) {
             $length = 0;
             if (isset($options[CURLOPT_POSTFIELDS])) {
-                if (function_exists('mb_strlen')) {
-                    $length = mb_strlen($options[CURLOPT_POSTFIELDS]);
-                } else {
-                    $length = strlen($options[CURLOPT_POSTFIELDS]);
-                }
+                $length = strlen($options[CURLOPT_POSTFIELDS]);
             }
-            $options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], ['Content-Length: '.$length]);
+            $options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], ['Content-Length: ' . $length]);
         }
 
         curl_setopt_array($ch, $options);
