@@ -126,10 +126,10 @@ class WebHDFS
         }
 
         $result = $this->curl->getWithRedirect($url);
-        if ($this->curl->validateLastRequest()) {
+        if ($this->curl->validateLastRequest(true)) {
             return $result;
         }
-        throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+        throw $this->getResponseErrorException($this->curl->getLastRequestContentResult(true));
     }
 
     public function mkdirs($path, $permission = '')
@@ -171,31 +171,41 @@ class WebHDFS
     public function getFileStatus($path)
     {
         $url = $this->_buildUrl($path, array('op' => 'GETFILESTATUS'));
+        $r = $this->curl->get($url);
+        $this->curl->cleanLastRequest();
 
-        return $this->curl->get($url);
+        return $r;
     }
 
     public function listStatus($path)
     {
+        return $this->_listStatus($path, true);
+    }
+
+    private function _listStatus($path, $cleanLastRequest = false)
+    {
         $url = $this->_buildUrl($path, array('op' => 'LISTSTATUS'));
         if ($result = $this->curl->get($url)) {
+            if ($cleanLastRequest) {
+                $this->curl->cleanLastRequest();
+            }
             $result = json_decode($result);
             if (!is_null($result)) {
                 return $result;
             } else {
-                throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+                throw $this->getResponseErrorException($this->curl->getLastRequestContentResult($cleanLastRequest));
             }
         } else {
-            throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+            throw $this->getResponseErrorException($this->curl->getLastRequestContentResult($cleanLastRequest));
         }
-
-        return false;
     }
 
     public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxAmountOfFiles = false)
     {
         $result = array();
-        $listStatusResult = $this->listStatus($path);
+        $listStatusResult = $this->_listStatus($path);
+        $r = $this->curl->getLastRequestContentResult(true);
+
         if (isset($listStatusResult->FileStatuses->FileStatus)) {
             foreach ($listStatusResult->FileStatuses->FileStatus AS $fileEntity) {
                 switch ($fileEntity->type) {
@@ -220,7 +230,7 @@ class WebHDFS
                 }
             }
         } else {
-            throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+            throw $this->getResponseErrorException($r);
         }
 
         return $result;
@@ -229,7 +239,9 @@ class WebHDFS
     public function listDirectories($path, $recursive = false, $includeFileMetaData = false)
     {
         $result = array();
-        $listStatusResult = $this->listStatus($path);
+        $listStatusResult = $this->_listStatus($path);
+        $r = $this->curl->getLastRequestContentResult(true);
+
         if (isset($listStatusResult->FileStatuses->FileStatus)) {
             foreach ($listStatusResult->FileStatuses->FileStatus AS $fileEntity) {
                 switch ($fileEntity->type) {
@@ -249,7 +261,7 @@ class WebHDFS
                 }
             }
         } else {
-            throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+            throw $this->getResponseErrorException($r);
         }
 
         return $result;
@@ -259,14 +271,13 @@ class WebHDFS
 
     public function getContentSummary($path)
     {
-        $result = false;
         $url = $this->_buildUrl($path, array('op' => 'GETCONTENTSUMMARY'));
         $rawResult = $this->curl->get($url);
         $resultDecoded = json_decode($rawResult);
         if (isset($resultDecoded->ContentSummary)) {
             $result = $resultDecoded->ContentSummary;
         } else {
-            throw $this->getResponseErrorException($this->curl->getLastRequestContentResult());
+            throw $this->getResponseErrorException($this->curl->getLastRequestContentResult(true));
         }
 
         return $result;
@@ -435,5 +446,3 @@ class WebHDFS
         return new WebHDFS_Exception($exceptionMessage, $exceptionCode);
     }
 }
-
-?>

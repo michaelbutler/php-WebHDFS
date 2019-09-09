@@ -21,5 +21,3 @@ class WebHDFS_Exception extends \Exception
 
     const LOCAL_FILE_OPEN_ERR = 4;
 }
-
-?>
