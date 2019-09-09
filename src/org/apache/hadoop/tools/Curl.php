@@ -7,10 +7,22 @@ class Curl
     private $debug;
     private $lastRequestContentResult;
     private $lastRequestInfoResult;
+    /**
+     * @var array
+     * curl options
+     */
+    private $options;
 
     public function __construct($debug = false)
     {
         $this->debug = $debug;
+    }
+    /**
+     *
+     * @param $localPath string local file path to save
+     */
+    public function setOption($key,$value) {
+        $this->options[$key] = $value;
     }
 
     public function getWithRedirect($url)
@@ -158,6 +170,15 @@ class Curl
         } else {
             $options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], array('Expect: '));
         }
+        if (isset($this->options['local_file_handler'])) {
+            $fp = $this->options['local_file_handler'];
+            flock($fp,LOCK_EX);
+            $options[CURLOPT_WRITEFUNCTION] = function ($ch, $string) use ($fp) {
+                $length = fwrite($fp, $string);
+                return $length;
+            };
+            fflush($fp);
+        }
         curl_setopt_array($ch, $options);
         $result = curl_exec($ch);
         $this->lastRequestContentResult = $result;
@@ -165,7 +186,9 @@ class Curl
         if ($returnInfo) {
             $result = $this->lastRequestInfoResult;
         }
-
+        if (isset($this->options['local_file_handler'])) {
+            fclose($this->options['local_file_handler']);
+        }
         curl_close($ch);
 
         return $result;
