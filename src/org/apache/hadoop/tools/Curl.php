@@ -194,13 +194,34 @@ class Curl
         }
         if (isset($this->options['local_file_handler'])) {
             $fp = $this->options['local_file_handler'];
-            flock($fp,LOCK_EX);
+            flock($fp, LOCK_EX);
             $options[CURLOPT_WRITEFUNCTION] = function ($ch, $string) use ($fp) {
                 $length = fwrite($fp, $string);
+
                 return $length;
             };
             fflush($fp);
         }
+        // auto add content-length header
+        $has_content_length_header = false;
+        foreach ($options[CURLOPT_HTTPHEADER] as $header) {
+            if (stripos($header, 'content-length:') === 0) {
+                $has_content_length_header = true;
+                break;
+            }
+        }
+        if (!$has_content_length_header && !isset($options[CURLOPT_INFILE]) && !isset($options[CURLOPT_INFILESIZE])) {
+            $length = 0;
+            if (isset($options[CURLOPT_POSTFIELDS])) {
+                if (function_exists('mb_strlen')) {
+                    $length = mb_strlen($options[CURLOPT_POSTFIELDS]);
+                } else {
+                    $length = strlen($options[CURLOPT_POSTFIELDS]);
+                }
+            }
+            $options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], ['Content-Length: '.$length]);
+        }
+
         curl_setopt_array($ch, $options);
         // force clean memory before getting more data
         $this->cleanLastRequest();
