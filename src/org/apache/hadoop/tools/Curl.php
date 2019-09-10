@@ -17,11 +17,13 @@ class Curl
     {
         $this->debug = $debug;
     }
+
     /**
      *
      * @param $localPath string local file path to save
      */
-    public function setOption($key,$value) {
+    public function setOption($key, $value)
+    {
         $this->options[$key] = $value;
     }
 
@@ -194,13 +196,36 @@ class Curl
         }
         if (isset($this->options['local_file_handler'])) {
             $fp = $this->options['local_file_handler'];
-            flock($fp,LOCK_EX);
+            flock($fp, LOCK_EX);
             $options[CURLOPT_WRITEFUNCTION] = function ($ch, $string) use ($fp) {
                 $length = fwrite($fp, $string);
+
                 return $length;
             };
             fflush($fp);
         }
+        // auto add content-length header
+        $has_content_length_header = false;
+        foreach ($options[CURLOPT_HTTPHEADER] as $header) {
+            if (stripos($header, 'content-length:') === 0) {
+                $has_content_length_header = true;
+                break;
+            }
+        }
+        if (!$has_content_length_header && !isset($options[CURLOPT_INFILE]) && !isset($options[CURLOPT_INFILESIZE])) {
+            if (isset($options[CURLOPT_POSTFIELDS])) {
+                // only for string content
+                if (is_string($options[CURLOPT_POSTFIELDS]) && strpos($options[CURLOPT_POSTFIELDS], '@') !== 0) {
+                    $options[CURLOPT_HTTPHEADER] = array_merge(
+                        $options[CURLOPT_HTTPHEADER],
+                        ['Content-Length: '.strlen($options[CURLOPT_POSTFIELDS])]
+                    );
+                }
+            } else {
+                $options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], ['Content-Length: 0']);
+            }
+        }
+
         curl_setopt_array($ch, $options);
         // force clean memory before getting more data
         $this->cleanLastRequest();
