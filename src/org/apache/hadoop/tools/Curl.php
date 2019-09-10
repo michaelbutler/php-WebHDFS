@@ -213,11 +213,17 @@ class Curl
             }
         }
         if (!$has_content_length_header && !isset($options[CURLOPT_INFILE]) && !isset($options[CURLOPT_INFILESIZE])) {
-            $length = 0;
             if (isset($options[CURLOPT_POSTFIELDS])) {
-                $length = strlen($options[CURLOPT_POSTFIELDS]);
+                // only for string content
+                if (is_string($options[CURLOPT_POSTFIELDS]) && strpos($options[CURLOPT_POSTFIELDS], '@') !== 0) {
+                    $options[CURLOPT_HTTPHEADER] = array_merge(
+                        $options[CURLOPT_HTTPHEADER],
+                        ['Content-Length: '.strlen($options[CURLOPT_POSTFIELDS])]
+                    );
+                }
+            } else {
+                $options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], ['Content-Length: 0']);
             }
-            $options[CURLOPT_HTTPHEADER] = array_merge($options[CURLOPT_HTTPHEADER], ['Content-Length: ' . $length]);
         }
 
         curl_setopt_array($ch, $options);
