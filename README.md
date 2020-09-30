@@ -1,4 +1,4 @@
-# php-WebHDFS
+# php-WebHDFS - An Amazing Idea
 
 ## Description
 
