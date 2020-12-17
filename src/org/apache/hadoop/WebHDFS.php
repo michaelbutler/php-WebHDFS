@@ -52,7 +52,7 @@ class WebHDFS
 
         $options = array(
             'op' => 'CREATE',
-            'overwrite' => $overwrite,
+            'overwrite' => $overwrite ? 'true' : 'false',
             'blocksize' => $blocksize,
             'replication' => $replication,
             'permission' => $permission,
@@ -79,7 +79,7 @@ class WebHDFS
     ) {
         $options = array(
             'op' => 'CREATE',
-            'overwrite' => $overwrite,
+            'overwrite' => $overwrite ? 'true' : 'false',
             'blocksize' => $blockSize,
             'replication' => $replication,
             'permission' => $permission,
