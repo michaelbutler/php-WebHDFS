@@ -200,7 +200,15 @@ class WebHDFS
         }
     }
 
-    public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxAmountOfFiles = false)
+    /**
+     * @param string $path
+     * @param bool $recursive
+     * @param bool $includeFileMetaData
+     * @param int $maxAmountOfFiles
+     * @return array
+     * @throws WebHDFS_Exception
+     */
+    public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxAmountOfFiles = 0)
     {
         $result = array();
         $listStatusResult = $this->_listStatus($path);
@@ -231,7 +239,7 @@ class WebHDFS
                         }
                 }
                 // recursion will be interrupted since we subtract the amount of the current result set from the maxAmountOfFiles amount with calling the next recursion
-                if (sizeof($result) >= $maxAmountOfFiles) {
+                if ($maxAmountOfFiles !== 0 && sizeof($result) >= $maxAmountOfFiles) {
                     break;
                 }
             }
