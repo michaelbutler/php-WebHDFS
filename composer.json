@@ -28,7 +28,8 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-0": {

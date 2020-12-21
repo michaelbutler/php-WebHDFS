@@ -204,11 +204,11 @@ class WebHDFS
      * @param string $path
      * @param bool $recursive
      * @param bool $includeFileMetaData
-     * @param int $maxAmountOfFiles
+     * @param int $maxDepth max depth to search recursively. When value below zero, it will search to the end of tree
      * @return array
      * @throws WebHDFS_Exception
      */
-    public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxAmountOfFiles = 0)
+    public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxDepth = -1)
     {
         $result = array();
         $listStatusResult = $this->_listStatus($path);
@@ -225,7 +225,7 @@ class WebHDFS
                                     $this->concatPath([$path, $fileEntity->pathSuffix]),
                                     true,
                                     $includeFileMetaData,
-                                    $maxAmountOfFiles - sizeof($result)
+                                    $maxDepth - 1
                                 )
                             );
                         }
@@ -239,7 +239,7 @@ class WebHDFS
                         }
                 }
                 // recursion will be interrupted since we subtract the amount of the current result set from the maxAmountOfFiles amount with calling the next recursion
-                if ($maxAmountOfFiles !== 0 && sizeof($result) >= $maxAmountOfFiles) {
+                if ($maxDepth === 0) {
                     break;
                 }
             }
