@@ -52,7 +52,7 @@ class WebHDFS
 
         $options = array(
             'op' => 'CREATE',
-            'overwrite' => $overwrite,
+            'overwrite' => $overwrite ? 'true' : 'false',
             'blocksize' => $blocksize,
             'replication' => $replication,
             'permission' => $permission,
@@ -79,7 +79,7 @@ class WebHDFS
     ) {
         $options = array(
             'op' => 'CREATE',
-            'overwrite' => $overwrite,
+            'overwrite' => $overwrite ? 'true' : 'false',
             'blocksize' => $blockSize,
             'replication' => $replication,
             'permission' => $permission,
@@ -200,7 +200,15 @@ class WebHDFS
         }
     }
 
-    public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxAmountOfFiles = false)
+    /**
+     * @param string $path
+     * @param bool $recursive
+     * @param bool $includeFileMetaData
+     * @param int $maxDepth max depth to search recursively. When value below zero, it will search to the end of tree
+     * @return array
+     * @throws WebHDFS_Exception
+     */
+    public function listFiles($path, $recursive = false, $includeFileMetaData = false, $maxDepth = -1)
     {
         $result = array();
         $listStatusResult = $this->_listStatus($path);
@@ -211,21 +219,27 @@ class WebHDFS
                 switch ($fileEntity->type) {
                     case 'DIRECTORY':
                         if ($recursive === true) {
-                            $result = array_merge($result,
-                                $this->listFiles($path.$fileEntity->pathSuffix.'/', true, $includeFileMetaData,
-                                    $maxAmountOfFiles - sizeof($result)));
+                            $result = array_merge(
+                                $result,
+                                $this->listFiles(
+                                    $this->concatPath([$path, $fileEntity->pathSuffix]),
+                                    true,
+                                    $includeFileMetaData,
+                                    $maxDepth - 1
+                                )
+                            );
                         }
                         break;
                     default:
                         if ($includeFileMetaData === true) {
-                            $fileEntity->path = $path.$fileEntity->pathSuffix;
+                            $fileEntity->path = $this->concatPath([$path, $fileEntity->pathSuffix]);
                             $result[] = $fileEntity;
                         } else {
-                            $result[] = $path.$fileEntity->pathSuffix;
+                            $result[] = $this->concatPath([$path, $fileEntity->pathSuffix]);
                         }
                 }
                 // recursion will be interrupted since we subtract the amount of the current result set from the maxAmountOfFiles amount with calling the next recursion
-                if (sizeof($result) >= $maxAmountOfFiles) {
+                if ($maxDepth === 0) {
                     break;
                 }
             }
@@ -247,15 +261,19 @@ class WebHDFS
                 switch ($fileEntity->type) {
                     case 'DIRECTORY':
                         if ($includeFileMetaData === true) {
-                            $fileEntity->path = $path.$fileEntity->pathSuffix;
+                            $fileEntity->path = $this->concatPath([$path, $fileEntity->pathSuffix]);
                             $result[] = $fileEntity;
                         } else {
-                            $result[] = $path.$fileEntity->pathSuffix;
+                            $result[] = $this->concatPath([$path, $fileEntity->pathSuffix]);
                         }
                         if ($recursive === true) {
                             $result = array_merge($result,
-                                $this->listDirectories($path.$fileEntity->pathSuffix.'/', $recursive,
-                                    $includeFileMetaData));
+                                $this->listDirectories(
+                                    $this->concatPath([$path, $fileEntity->pathSuffix]),
+                                    $recursive,
+                                    $includeFileMetaData
+                                )
+                            );
                         }
                         break;
                 }
@@ -445,4 +463,22 @@ class WebHDFS
 
         return new WebHDFS_Exception($exceptionMessage, $exceptionCode);
     }
+
+    private function concatPath(array $paths) {
+        $result = '';
+        foreach ($paths as $path) {
+            if (!$result || preg_match('/.+\/$/', $result)) {
+                $result .= $path;
+                continue;
+            }
+
+            $result .= '/' . $path;
+        }
+        return $this->removeMultiSlashFromPath($result);
+    }
+
+    private function removeMultiSlashFromPath($path) {
+        return preg_replace('/(\/)\/+/', '$1', $path);
+    }
+
 }

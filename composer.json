@@ -1,9 +1,14 @@
 {
-  "name": "simpleenergy/php-webhdfs",
+  "name": "dreamfactory/php-webhdfs",
   "description": "PHP WebHDFS, forked from https://github.com/simpleenergy/php-WebHDFS",
   "minimum-stability": "stable",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/dreamfactorysoftware/php-WebHDFS"
+    }
+  ],
   "license": "MIT",
-  "version": "1.0.7",
   "authors": [
     {
       "name": "tranch-xiao",
@@ -28,7 +33,8 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-0": {
