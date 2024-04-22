@@ -63,7 +63,6 @@ class Curl
     {
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_HEADER] = true;
-        $options[CURLINFO_EFFECTIVE_URL] = true;
         $options[CURLOPT_RETURNTRANSFER] = true;
         $header = $this->_exec($options);
         $matches = array();
