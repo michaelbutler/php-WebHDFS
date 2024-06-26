@@ -13,9 +13,20 @@ class Curl
      */
     private $options;
 
-    public function __construct($debug = false)
+    /**
+     * @var array $curl_options Key value array of curl options. @see https://www.php.net/manual/en/function.curl-setopt.php
+     */
+    private $curl_options;
+
+    public function __construct($curl_options = [], $debug = false)
     {
+        $this->curl_options = $curl_options;
         $this->debug = $debug;
+    }
+
+    public function setCurlOptions(array $curl_options)
+    {
+        $this->curl_options = $curl_options;
     }
 
     /**
@@ -182,6 +193,8 @@ class Curl
     private function _exec($options, $returnInfo = false)
     {
         $ch = curl_init();
+        $options = array_merge($this->curl_options, $options);
+
         if ($this->debug === true) {
             $options[CURLOPT_VERBOSE] = true;
         }
@@ -231,6 +244,8 @@ class Curl
         $result = curl_exec($ch);
         $this->lastRequestContentResult = $result;
         $this->lastRequestInfoResult = curl_getinfo($ch);
+        $this->lastRequestInfoResult['curl_errno'] = curl_errno($ch);
+        $this->lastRequestInfoResult['curl_error'] = curl_error($ch);
         if ($returnInfo) {
             $result = $this->lastRequestInfoResult;
         }

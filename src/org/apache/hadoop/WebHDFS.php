@@ -24,7 +24,8 @@ class WebHDFS
         $user,
         $namenodeRpcHost,
         $namenodeRpcPort,
-        $debug
+        $curl_options = [],
+        $debug = false
     ) {
         $this->host = $host;
         $this->port = $port;
@@ -32,7 +33,15 @@ class WebHDFS
         $this->namenode_rpc_host = $namenodeRpcHost;
         $this->namenode_rpc_port = $namenodeRpcPort;
         $this->debug = $debug;
-        $this->curl = new Curl($this->debug);
+        $this->curl = new Curl($curl_options, $this->debug);
+    }
+
+    /**
+     * @return Curl
+     */
+    public function getCurl()
+    {
+        return $this->curl;
     }
 
     // File and Directory Operations
