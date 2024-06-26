@@ -3,7 +3,7 @@
   "description": "PHP WebHDFS, forked from https://github.com/simpleenergy/php-WebHDFS",
   "minimum-stability": "stable",
   "license": "MIT",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "authors": [
     {
       "name": "tranch-xiao",

@@ -24,7 +24,8 @@ class WebHDFS
         $user,
         $namenodeRpcHost,
         $namenodeRpcPort,
-        $debug
+        $curl_options = [],
+        $debug = false
     ) {
         $this->host = $host;
         $this->port = $port;
@@ -32,7 +33,36 @@ class WebHDFS
         $this->namenode_rpc_host = $namenodeRpcHost;
         $this->namenode_rpc_port = $namenodeRpcPort;
         $this->debug = $debug;
-        $this->curl = new Curl($this->debug);
+        $this->curl = new Curl($curl_options, $this->debug);
+    }
+
+    /**
+     * @return Curl
+     */
+    public function getCurl()
+    {
+        return $this->curl;
+    }
+
+    /**
+     * Get the result of the last CURL command.
+     *
+     * @return mixed
+     */
+    public function getLastRequestContentResult()
+    {
+        return $this->getCurl()->getLastRequestContentResult();
+    }
+
+    /**
+     * Get the curl info from the last CURL call.
+     * @link https://www.php.net/manual/en/function.curl-getinfo.php
+     *
+     * @return array
+     */
+    public function getLastRequestInfoResult()
+    {
+        return $this->getCurl()->getLastRequestInfoResult();
     }
 
     // File and Directory Operations

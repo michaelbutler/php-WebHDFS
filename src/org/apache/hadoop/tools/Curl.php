@@ -4,18 +4,47 @@ namespace org\apache\hadoop\tools;
 
 class Curl
 {
+    /** @var bool Optional debug flag, enables CURLOPT_VERBOSE */
     private $debug;
+
+    /** @var mixed Content result from the last CURL call */
     private $lastRequestContentResult;
+
+    /** @var array Info about last CURL result from curl_getinfo */
     private $lastRequestInfoResult;
+
     /**
      * @var array
      * curl options
      */
     private $options;
 
-    public function __construct($debug = false)
+    /**
+     * @var array $curl_options Key value array of curl options.
+     * @link https://www.php.net/manual/en/function.curl-setopt.php
+     */
+    private $curl_options;
+
+    /**
+     * @param array $curl_options Key value array of curl options. @link https://www.php.net/manual/en/function.curl-setopt.php
+     * @param bool $debug Optional debug parameter, sets CURLOPT_VERBOSE if true.
+     */
+    public function __construct($curl_options = [], $debug = false)
     {
+        $this->setCurlOptions($curl_options);
         $this->debug = $debug;
+    }
+
+    /**
+     * Set an array of curl options. Keys are CURLOPT_* constants, values are the value to be set.
+     * @link https://www.php.net/manual/en/function.curl-setopt-array.php
+     *
+     * @param array $curl_options Array of curl options to set
+     * @return void
+     */
+    public function setCurlOptions(array $curl_options)
+    {
+        $this->curl_options = $curl_options;
     }
 
     /**
@@ -59,7 +88,7 @@ class Curl
         return $this->_findRedirectUrl($url, array(CURLOPT_POST => true));
     }
 
-    private function _findRedirectUrl($url, $options)
+    private function _findRedirectUrl($url, $options = [])
     {
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_HEADER] = true;
@@ -75,7 +104,7 @@ class Curl
         return null;
     }
 
-    public function putFile($url, $filename)
+    public function putFile($url, $filename, $options = array())
     {
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_PUT] = true;
@@ -88,7 +117,7 @@ class Curl
         return ('201' == $info['http_code']);
     }
 
-    public function putData($url, $data, $contentType = 'application/json')
+    public function putData($url, $data, $options = array())
     {
         $options[CURLOPT_URL] = $url;
         // $options[CURLOPT_PUT] = true;
@@ -104,7 +133,7 @@ class Curl
         return ('201' == $info['http_code']);
     }
 
-    public function postString($url, $string)
+    public function postString($url, $string, $options = array())
     {
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_POST] = true;
@@ -115,9 +144,8 @@ class Curl
         return ('200' == $info['http_code']);
     }
 
-    public function put($url)
+    public function put($url, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_PUT] = true;
         $options[CURLOPT_RETURNTRANSFER] = true;
@@ -126,9 +154,8 @@ class Curl
         return $this->_exec($options);
     }
 
-    public function post($url)
+    public function post($url, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_POST] = true;
         $options[CURLOPT_RETURNTRANSFER] = true;
@@ -136,9 +163,8 @@ class Curl
         return $this->_exec($options);
     }
 
-    public function delete($url)
+    public function delete($url, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_CUSTOMREQUEST] = "DELETE";
         $options[CURLOPT_RETURNTRANSFER] = true;
@@ -146,6 +172,12 @@ class Curl
         return $this->_exec($options);
     }
 
+    /**
+     * Get the content form the last CURL call.
+     *
+     * @param bool $cleanLastRequest Clear the last CURL content result after getting.
+     * @return mixed
+     */
     public function getLastRequestContentResult($cleanLastRequest = false)
     {
         $r = $this->lastRequestContentResult;
@@ -156,6 +188,13 @@ class Curl
         return $r;
     }
 
+    /**
+     * Get the curl info from the last CURL call.
+     * @link https://www.php.net/manual/en/function.curl-getinfo.php
+     *
+     * @param bool $cleanLastRequest Clear last CURL info result after getting.
+     * @return array
+     */
     public function getLastRequestInfoResult($cleanLastRequest = false)
     {
         $r = $this->lastRequestInfoResult;
@@ -166,12 +205,29 @@ class Curl
         return $r;
     }
 
+    /**
+     * Validate if the last CURL response is within the 2xx-3xx HTTP status code range and has no curl errors.
+     *
+     * @param bool $cleanLastRequestIfValid Clear last CURL info result after getting.
+     * @return bool
+     */
     public function validateLastRequest($cleanLastRequestIfValid = false)
     {
         $http_code = $this->getLastRequestInfoResult()['http_code'];
+
+        if (!$http_code) {
+            return false;
+        }
+
         if ($http_code >= 400 && $http_code <= 500) {
             return false;
         }
+
+        $curl_errno = $this->getLastRequestInfoResult()['curl_errno'];
+        if ($curl_errno !== CURLE_OK) {
+            return false;
+        }
+
         if ($cleanLastRequestIfValid) {
             $this->cleanLastRequest();
         }
@@ -182,6 +238,8 @@ class Curl
     private function _exec($options, $returnInfo = false)
     {
         $ch = curl_init();
+        $options += $this->curl_options;
+
         if ($this->debug === true) {
             $options[CURLOPT_VERBOSE] = true;
         }
@@ -231,6 +289,8 @@ class Curl
         $result = curl_exec($ch);
         $this->lastRequestContentResult = $result;
         $this->lastRequestInfoResult = curl_getinfo($ch);
+        $this->lastRequestInfoResult['curl_errno'] = curl_errno($ch);
+        $this->lastRequestInfoResult['curl_error'] = curl_error($ch);
         if ($returnInfo) {
             $result = $this->lastRequestInfoResult;
         }
