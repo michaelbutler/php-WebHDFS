@@ -4,9 +4,15 @@ namespace org\apache\hadoop\tools;
 
 class Curl
 {
+    /** @var bool Optional debug flag, enables CURLOPT_VERBOSE */
     private $debug;
+
+    /** @var mixed Content result from the last CURL call */
     private $lastRequestContentResult;
+
+    /** @var array Info about last CURL result from curl_getinfo */
     private $lastRequestInfoResult;
+
     /**
      * @var array
      * curl options
@@ -173,6 +179,12 @@ class Curl
         return $this->_exec($options);
     }
 
+    /**
+     * Get the content form the last CURL call.
+     *
+     * @param bool $cleanLastRequest Clear the last CURL content result after getting.
+     * @return mixed
+     */
     public function getLastRequestContentResult($cleanLastRequest = false)
     {
         $r = $this->lastRequestContentResult;
@@ -183,6 +195,13 @@ class Curl
         return $r;
     }
 
+    /**
+     * Get the curl info from the last CURL call.
+     * @link https://www.php.net/manual/en/function.curl-getinfo.php
+     *
+     * @param bool $cleanLastRequest Clear last CURL info result after getting.
+     * @return array
+     */
     public function getLastRequestInfoResult($cleanLastRequest = false)
     {
         $r = $this->lastRequestInfoResult;

@@ -44,6 +44,23 @@ class WebHDFS
         return $this->curl;
     }
 
+    /**
+     * Get the result of the last CURL command.
+     * @return mixed
+     */
+    public function getLastRequestContentResult()
+    {
+        return $this->getCurl()->getLastRequestContentResult();
+    }
+
+    /**
+     * @return array
+     */
+    public function getLastRequestInfoResult()
+    {
+        return $this->getCurl()->getLastRequestInfoResult();
+    }
+
     // File and Directory Operations
 
     public function create(
