@@ -84,6 +84,7 @@ class Curl
 
     private function _findRedirectUrl($url, $options)
     {
+        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_HEADER] = true;
         $options[CURLOPT_RETURNTRANSFER] = true;
@@ -100,6 +101,7 @@ class Curl
 
     public function putFile($url, $filename)
     {
+        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_PUT] = true;
         $handle = fopen($filename, "r");
@@ -113,6 +115,7 @@ class Curl
 
     public function putData($url, $data, $contentType = 'application/json')
     {
+        $options = array();
         $options[CURLOPT_URL] = $url;
         // $options[CURLOPT_PUT] = true;
         $options[CURLOPT_CUSTOMREQUEST] = 'PUT';
@@ -129,6 +132,7 @@ class Curl
 
     public function postString($url, $string)
     {
+        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_POST] = true;
         $options[CURLOPT_POSTFIELDS] = $string;
@@ -200,7 +204,7 @@ class Curl
         if ($http_code >= 400 && $http_code <= 500) {
             return false;
         }
-        
+
         if ($cleanLastRequestIfValid) {
             $this->cleanLastRequest();
         }
