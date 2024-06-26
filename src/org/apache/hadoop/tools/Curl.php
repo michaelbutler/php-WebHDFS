@@ -14,7 +14,8 @@ class Curl
     private $options;
 
     /**
-     * @var array $curl_options Key value array of curl options. @see https://www.php.net/manual/en/function.curl-setopt.php
+     * @var array $curl_options Key value array of curl options.
+     * @link https://www.php.net/manual/en/function.curl-setopt.php
      */
     private $curl_options;
 
@@ -26,7 +27,7 @@ class Curl
 
     /**
      * Set an array of curl options. Keys are CURLOPT_* constants, values are the value to be set.
-     * @see https://www.php.net/manual/en/function.curl-setopt-array.php
+     * @link https://www.php.net/manual/en/function.curl-setopt-array.php
      *
      * @param array $curl_options Array of curl options to set
      * @return void
