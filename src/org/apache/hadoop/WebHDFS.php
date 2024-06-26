@@ -46,6 +46,7 @@ class WebHDFS
 
     /**
      * Get the result of the last CURL command.
+     *
      * @return mixed
      */
     public function getLastRequestContentResult()
@@ -54,6 +55,9 @@ class WebHDFS
     }
 
     /**
+     * Get the curl info from the last CURL call.
+     * @link https://www.php.net/manual/en/function.curl-getinfo.php
+     *
      * @return array
      */
     public function getLastRequestInfoResult()
