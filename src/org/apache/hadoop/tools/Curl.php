@@ -88,9 +88,8 @@ class Curl
         return $this->_findRedirectUrl($url, array(CURLOPT_POST => true));
     }
 
-    private function _findRedirectUrl($url, $options)
+    private function _findRedirectUrl($url, $options = [])
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_HEADER] = true;
         $options[CURLOPT_RETURNTRANSFER] = true;
