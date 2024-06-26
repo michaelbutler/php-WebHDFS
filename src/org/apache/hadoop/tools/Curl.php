@@ -104,9 +104,8 @@ class Curl
         return null;
     }
 
-    public function putFile($url, $filename)
+    public function putFile($url, $filename, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_PUT] = true;
         $handle = fopen($filename, "r");
@@ -118,9 +117,8 @@ class Curl
         return ('201' == $info['http_code']);
     }
 
-    public function putData($url, $data, $contentType = 'application/json')
+    public function putData($url, $data, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         // $options[CURLOPT_PUT] = true;
         $options[CURLOPT_CUSTOMREQUEST] = 'PUT';
@@ -135,9 +133,8 @@ class Curl
         return ('201' == $info['http_code']);
     }
 
-    public function postString($url, $string)
+    public function postString($url, $string, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_POST] = true;
         $options[CURLOPT_POSTFIELDS] = $string;
@@ -147,9 +144,8 @@ class Curl
         return ('200' == $info['http_code']);
     }
 
-    public function put($url)
+    public function put($url, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_PUT] = true;
         $options[CURLOPT_RETURNTRANSFER] = true;
@@ -158,9 +154,8 @@ class Curl
         return $this->_exec($options);
     }
 
-    public function post($url)
+    public function post($url, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_POST] = true;
         $options[CURLOPT_RETURNTRANSFER] = true;
@@ -168,9 +163,8 @@ class Curl
         return $this->_exec($options);
     }
 
-    public function delete($url)
+    public function delete($url, $options = array())
     {
-        $options = array();
         $options[CURLOPT_URL] = $url;
         $options[CURLOPT_CUSTOMREQUEST] = "DELETE";
         $options[CURLOPT_RETURNTRANSFER] = true;
@@ -211,6 +205,12 @@ class Curl
         return $r;
     }
 
+    /**
+     * Validate if the last CURL response is within the 2xx-3xx HTTP status code range.
+     *
+     * @param bool $cleanLastRequestIfValid Clear last CURL info result after getting.
+     * @return bool
+     */
     public function validateLastRequest($cleanLastRequestIfValid = false)
     {
         $http_code = $this->getLastRequestInfoResult()['http_code'];
