@@ -223,6 +223,11 @@ class Curl
             return false;
         }
 
+        $curl_errno = $this->getLastRequestInfoResult()['curl_errno'];
+        if ($curl_errno !== CURLE_OK) {
+            return false;
+        }
+
         if ($cleanLastRequestIfValid) {
             $this->cleanLastRequest();
         }
