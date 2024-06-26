@@ -206,7 +206,7 @@ class Curl
     }
 
     /**
-     * Validate if the last CURL response is within the 2xx-3xx HTTP status code range.
+     * Validate if the last CURL response is within the 2xx-3xx HTTP status code range and has no curl errors.
      *
      * @param bool $cleanLastRequestIfValid Clear last CURL info result after getting.
      * @return bool
