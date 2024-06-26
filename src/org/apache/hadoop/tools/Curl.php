@@ -20,10 +20,17 @@ class Curl
 
     public function __construct($curl_options = [], $debug = false)
     {
-        $this->curl_options = $curl_options;
+        $this->setCurlOptions($curl_options);
         $this->debug = $debug;
     }
 
+    /**
+     * Set an array of curl options. Keys are CURLOPT_* constants, values are the value to be set.
+     * @see https://www.php.net/manual/en/function.curl-setopt-array.php
+     *
+     * @param array $curl_options Array of curl options to set
+     * @return void
+     */
     public function setCurlOptions(array $curl_options)
     {
         $this->curl_options = $curl_options;
