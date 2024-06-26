@@ -215,7 +215,7 @@ class Curl
     private function _exec($options, $returnInfo = false)
     {
         $ch = curl_init();
-        $options = array_merge($this->curl_options, $options);
+        $options += $this->curl_options;
 
         if ($this->debug === true) {
             $options[CURLOPT_VERBOSE] = true;
