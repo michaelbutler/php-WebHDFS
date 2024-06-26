@@ -192,9 +192,15 @@ class Curl
     public function validateLastRequest($cleanLastRequestIfValid = false)
     {
         $http_code = $this->getLastRequestInfoResult()['http_code'];
+
+        if (!$http_code) {
+            return false;
+        }
+
         if ($http_code >= 400 && $http_code <= 500) {
             return false;
         }
+        
         if ($cleanLastRequestIfValid) {
             $this->cleanLastRequest();
         }
