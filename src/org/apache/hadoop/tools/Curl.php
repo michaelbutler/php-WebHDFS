@@ -19,6 +19,10 @@ class Curl
      */
     private $curl_options;
 
+    /**
+     * @param array $curl_options Key value array of curl options. @link https://www.php.net/manual/en/function.curl-setopt.php
+     * @param bool $debug Optional debug parameter, sets CURLOPT_VERBOSE if true.
+     */
     public function __construct($curl_options = [], $debug = false)
     {
         $this->setCurlOptions($curl_options);
